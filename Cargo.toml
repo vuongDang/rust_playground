@@ -1,5 +1,5 @@
 [workspace]
-
-members = [ "bootcamp", "miscellaneous",
+resolver = "2"
+members = [ "bootcamp", "concurrency", "macros", "miscellaneous",
   "specialization"
 ]
