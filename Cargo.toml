@@ -1,5 +1,5 @@
 [workspace]
 resolver = "2"
-members = [ "bootcamp", "concurrency", "macros", "miscellaneous",
+members = [ "bootcamp/stackoverflow", "concurrency", "macros", "miscellaneous",
   "specialization"
 ]
