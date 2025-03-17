@@ -1,7 +1,15 @@
+mod handlers;
 mod models;
+
 use dotenvy::dotenv;
+use handlers::*;
 use log::*;
 use sqlx::postgres::PgPoolOptions;
+
+use axum::{
+    routing::{delete, get, post},
+    Router,
+};
 
 #[tokio::main]
 async fn main() {
@@ -14,8 +22,19 @@ async fn main() {
         .await
         .expect("Failed to create Postgres connection pool");
 
-    let recs = sqlx::query!("SELECT * FROM questions")
-        .fetch_all(&pool)
+    info!("Connected to Postgres db");
+
+    let app = Router::new()
+        .route("/question", post(create_question))
+        .route("/questions", get(read_questions))
+        .route("/question", delete(delete_question))
+        .route("/answer", post(create_answer))
+        .route("/answers", get(read_answers))
+        .route("/answer", delete(delete_answer));
+
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:8000")
         .await
         .unwrap();
+
+    axum::serve(listener, app).await.unwrap();
 }
