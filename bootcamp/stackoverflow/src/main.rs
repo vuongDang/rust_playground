@@ -1,5 +1,6 @@
 mod handlers;
 mod models;
+mod persistance;
 
 use dotenvy::dotenv;
 use handlers::*;
