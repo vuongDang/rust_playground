@@ -79,7 +79,7 @@ impl AnswersDao for AnswersDaoImpl {
         let uuid =
             Uuid::parse_str(&answer_uuid).map_err(|e| DBError::InvalidUUID(e.to_string()))?;
 
-        // TODO: Make a database query to delete an answer given the answer uuid.
+        // Make a database query to delete an answer given the answer uuid.
         // Here is the SQL query:
         // ```
         // DELETE FROM answers WHERE answer_uuid = $1

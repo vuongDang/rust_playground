@@ -4,12 +4,13 @@ use crate::{
 };
 use log::error;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Deserialize)]
 pub enum HandlerError {
     BadRequest(String),
     InternalError(String),
 }
 
+use serde::Deserialize;
 use HandlerError::*;
 pub async fn create_question(
     question: Question,
