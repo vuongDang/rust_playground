@@ -110,17 +110,17 @@ mod answers_tests {
             .await
             .map_err(|e| format!("{:?}", e))?;
 
-        // // let result = answer_doa
-        // //     .create_answer(Answer {
-        // //         question_uuid: result.question_uuid,
-        // //         content: "test content".to_owned(),
-        // //     })
-        // //     .await
-        // //     .map_err(|e| format!("{:?}", e))?;
-        //
-        // // if result.content != "test content".to_owned() {
-        // //     return Err("Incorrect answer content".to_owned());
-        // // }
+        let result = answer_doa
+            .create_answer(Answer {
+                question_uuid: result.question_uuid,
+                content: "test content".to_owned(),
+            })
+            .await
+            .map_err(|e| format!("{:?}", e))?;
+
+        if result.content != "test content".to_owned() {
+            return Err("Incorrect answer content".to_owned());
+        }
 
         Ok(())
     }

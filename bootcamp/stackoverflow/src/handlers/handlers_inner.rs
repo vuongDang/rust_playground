@@ -10,12 +10,6 @@ pub enum HandlerError {
     InternalError(String),
 }
 
-impl HandlerError {
-    pub fn default_internal_error() -> Self {
-        HandlerError::InternalError("Something went wrong! Please try again.".to_owned())
-    }
-}
-
 use HandlerError::*;
 pub async fn create_question(
     question: Question,

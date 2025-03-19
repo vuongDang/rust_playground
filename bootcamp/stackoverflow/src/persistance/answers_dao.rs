@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use sqlx::{types::Uuid, PgPool};
 
-use crate::models::{postgres_error_codes, Answer, AnswerDetail, DBError, QuestionDetail};
+use crate::models::{Answer, AnswerDetail, DBError, QuestionDetail};
 
 #[async_trait]
 pub trait AnswersDao {

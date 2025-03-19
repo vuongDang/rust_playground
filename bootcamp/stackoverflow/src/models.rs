@@ -86,6 +86,7 @@ pub enum DBError {
 }
 
 // source: https://www.postgresql.org/docs/current/errcodes-appendix.html
+#[allow(dead_code)]
 pub mod postgres_error_codes {
     pub const FOREIGN_KEY_VIOLATION: &str = "23503";
 }
