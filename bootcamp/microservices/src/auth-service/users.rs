@@ -1,8 +1,7 @@
 use pbkdf2::{
-    password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
+    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Pbkdf2,
 };
-use rand_core::OsRng;
 use uuid::Uuid;
 
 use std::collections::HashMap;
@@ -28,7 +27,10 @@ pub struct UsersImpl {
 
 impl Users for UsersImpl {
     fn create_user(&mut self, username: String, password: String) -> Result<(), String> {
-        // TODO: Check if username already exist. If so return an error.
+        // Check if username already exist
+        if self.username_to_user.contains_key(&username) {
+            return Err(format!("User {username} already exists"));
+        }
 
         let salt = SaltString::generate(&mut OsRng);
 
@@ -37,30 +39,43 @@ impl Users for UsersImpl {
             .map_err(|e| format!("Failed to hash password.\n{e:?}"))?
             .to_string();
 
-        let user: User = todo!(); // Create new user with unique uuid and hashed password.
+        let user_uuid = Uuid::new_v4().to_string();
 
-        // TODO: Add user to `username_to_user` and `uuid_to_user`.
+        // Create new user with unique uuid and hashed password.
+        let user: User = User {
+            user_uuid: user_uuid.clone(),
+            username: username.clone(),
+            password: hashed_password,
+        };
+
+        self.username_to_user.insert(username, user.clone());
+        self.uuid_to_user.insert(user_uuid, user);
 
         Ok(())
     }
 
+    //  If the username and password passed in matches the user's username and password return the user's uuid.
     fn get_user_uuid(&self, username: String, password: String) -> Option<String> {
-        let user: &User = todo!(); // Retrieve `User` or return `None` is user can't be found.
+        if let Some(user) = self.username_to_user.get(&username) {
+            // Get user's password as `PasswordHash` instance.
+            let hashed_password = user.password.clone();
+            let parsed_hash = PasswordHash::new(&hashed_password).ok()?;
 
-        // Get user's password as `PasswordHash` instance. 
-        let hashed_password = user.password.clone();
-        let parsed_hash = PasswordHash::new(&hashed_password).ok()?;
-
-        // Verify passed in password matches user's password.
-        let result = Pbkdf2.verify_password(password.as_bytes(), &parsed_hash);
-
-        // TODO: If the username and password passed in matches the user's username and password return the user's uuid.
+            // Verify passed in password matches user's password.
+            let result = Pbkdf2.verify_password(password.as_bytes(), &parsed_hash);
+            if result.is_ok() {
+                return Some(user.user_uuid.clone());
+            }
+        }
 
         None
     }
 
+    //  Remove user from `username_to_user` and `uuid_to_user`.
     fn delete_user(&mut self, user_uuid: String) {
-        // TODO: Remove user from `username_to_user` and `uuid_to_user`.
+        if let Some(user) = self.uuid_to_user.remove(&user_uuid) {
+            self.username_to_user.remove(&user.username);
+        }
     }
 }
 

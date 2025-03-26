@@ -45,17 +45,38 @@ impl Auth for AuthService {
 
         let req = request.into_inner();
 
-        let result: Option<String> = todo!(); // Get user's uuid from `users_service`. Panic if the lock is poisoned.
+        // Get user's uuid from `users_service`. Panic if the lock is poisoned.
+        let result: Option<String> = self
+            .users_service
+            .lock()
+            .expect("Poisoned users service mutex")
+            .get_user_uuid(req.username, req.password);
 
         // Match on `result`. If `result` is `None` return a SignInResponse with a the `status_code` set to `Failure`
         // and `user_uuid`/`session_token` set to empty strings.
-        let user_uuid: String = todo!();
+        let response = match result {
+            None => SignInResponse {
+                status_code: StatusCode::Failure.into(),
+                user_uuid: String::new(),
+                session_token: String::new(),
+            },
+            Some(uuid) => {
+                // Create new session using `sessions_service`. Panic if the lock is poisoned.
+                let session_token: String = self
+                    .sessions_service
+                    .lock()
+                    .expect("Poisoned sessions_service mutex")
+                    .create_session(&uuid);
 
-        let session_token: String = todo!(); // Create new session using `sessions_service`. Panic if the lock is poisoned.
+                SignInResponse {
+                    status_code: StatusCode::Success.into(),
+                    user_uuid: uuid,
+                    session_token,
+                }
+            }
+        };
 
-        let reply: SignInResponse = todo!(); // Create a `SignInResponse` with `status_code` set to `Success`
-
-        Ok(Response::new(reply))
+        Ok(Response::new(response))
     }
 
     async fn sign_up(
@@ -66,17 +87,21 @@ impl Auth for AuthService {
 
         let req = request.into_inner();
 
-        let result: Result<(), String> = todo!(); // Create a new user through `users_service`. Panic if the lock is poisoned.
+        // Create a new user through `users_service`. Panic if the lock is poisoned.
+        let result: Result<(), String> = self
+            .users_service
+            .lock()
+            .expect("Poisoned users service mutex")
+            .create_user(req.username, req.password);
 
-        // TODO: Return a `SignUpResponse` with the appropriate `status_code` based on `result`.
-        match result {
-            Ok(_) => {
-                todo!()
-            }
-            Err(_) => {
-                todo!()
-            }
-        }
+        let status_code = match result {
+            Ok(_) => StatusCode::Success,
+            Err(_) => StatusCode::Failure,
+        };
+
+        Ok(Response::new(SignUpResponse {
+            status_code: status_code.into(),
+        }))
     }
 
     async fn sign_out(
@@ -87,9 +112,14 @@ impl Auth for AuthService {
 
         let req = request.into_inner();
 
-        // TODO: Delete session using `sessions_service`.
+        self.sessions_service
+            .lock()
+            .expect("Poisoned sessions_service mutex")
+            .delete_session(&req.session_token);
 
-        let reply: SignOutResponse = todo!(); // Create `SignOutResponse` with `status_code` set to `Success`
+        let reply = SignOutResponse {
+            status_code: StatusCode::Success.into(),
+        };
 
         Ok(Response::new(reply))
     }
@@ -116,8 +146,8 @@ mod tests {
         let result = auth_service.sign_in(request).await.unwrap().into_inner();
 
         assert_eq!(result.status_code, StatusCode::Failure.into());
-        assert_eq!(result.user_uuid.is_empty(), true);
-        assert_eq!(result.session_token.is_empty(), true);
+        assert!(result.user_uuid.is_empty());
+        assert!(result.session_token.is_empty());
     }
 
     #[tokio::test]
@@ -139,8 +169,8 @@ mod tests {
         let result = auth_service.sign_in(request).await.unwrap().into_inner();
 
         assert_eq!(result.status_code, StatusCode::Failure.into());
-        assert_eq!(result.user_uuid.is_empty(), true);
-        assert_eq!(result.session_token.is_empty(), true);
+        assert!(result.user_uuid.is_empty());
+        assert!(result.session_token.is_empty());
     }
 
     #[tokio::test]
@@ -162,8 +192,8 @@ mod tests {
         let result = auth_service.sign_in(request).await.unwrap().into_inner();
 
         assert_eq!(result.status_code, StatusCode::Success.into());
-        assert_eq!(result.user_uuid.is_empty(), false);
-        assert_eq!(result.session_token.is_empty(), false);
+        assert!(!result.user_uuid.is_empty());
+        assert!(!result.session_token.is_empty());
     }
 
     #[tokio::test]
