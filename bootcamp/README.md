@@ -1,3 +1,3 @@
 # README
 
-Bootcamp projects to practice.
+Bootcamp projects for practice.
