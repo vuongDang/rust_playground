@@ -36,5 +36,5 @@ jobs:
 
       - name: Build and test code
         run: |
-          cargo build --verbose
-          cargo test --verbose
+          cargo build --verbose --package microservices
+          cargo test --verbose --package microservices
