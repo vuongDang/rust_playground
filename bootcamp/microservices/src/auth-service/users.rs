@@ -6,6 +6,7 @@ use uuid::Uuid;
 
 use std::collections::HashMap;
 
+#[allow(dead_code)]
 pub trait Users {
     fn create_user(&mut self, username: String, password: String) -> Result<(), String>;
     fn get_user_uuid(&self, username: String, password: String) -> Option<String>;

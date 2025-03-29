@@ -2,7 +2,7 @@ use std::env;
 
 use authentication::auth_client::AuthClient;
 use authentication::{SignInRequest, SignOutRequest, SignUpRequest};
-use tokio::time::{sleep, Duration};
+use tokio::time::{Duration, sleep};
 use tonic::{Request, Response};
 use uuid::Uuid;
 

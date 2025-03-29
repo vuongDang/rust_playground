@@ -3,7 +3,6 @@ use std::env;
 
 use authentication::auth_client::AuthClient;
 use authentication::{SignInRequest, SignOutRequest, SignUpRequest};
-use tonic::transport::Channel;
 use tonic::{Request, Response};
 
 use crate::authentication::{SignInResponse, SignOutResponse, SignUpResponse};
@@ -19,6 +18,7 @@ struct Cli {
     command: Option<Commands>,
 }
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Subcommand)]
 enum Commands {
     SignIn {
