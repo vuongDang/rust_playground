@@ -1,3 +1,4 @@
+mod arc;
 mod spinlock;
 
 fn main() {
